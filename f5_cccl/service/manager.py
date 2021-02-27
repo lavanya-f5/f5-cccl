@@ -80,7 +80,10 @@ class ServiceConfigDeployer(object):
             desired[resource] for resource in desired_set & managed_set
             if desired[resource] != managed[resource]
         ]
-
+        for resource in desired_set & managed_set:
+            if desired[resource] != managed[resource]:
+                LOGGER.debug("Managed Resource is /%s: Desired resource /%s ",
+                             desired[resource] ,managed[resource] )
         # Merge unmanaged resources with desired if needed
         for resource in unmanaged_set:
             update_resource = self._merge_resource(
@@ -127,7 +130,7 @@ class ServiceConfigDeployer(object):
             try:
                 start_time = time()
                 resource.create(self._bigip.mgmt_root())
-                LOGGER.debug("Created %s in %.5f seconds.",
+                LOGGER.info("Created %s in %.5f seconds.",
                              resource.name, (time() - start_time))
             except exc.F5CcclResourceConflictError:
                 LOGGER.warning(
