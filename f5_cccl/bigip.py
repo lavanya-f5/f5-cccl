@@ -104,6 +104,7 @@ class BigIPProxy(object):
         Args:
             rsc: A BIG-IP resource
         """
+        LOGGER.info("lavanya: resource is: %s,prefix is : %s",rsc.name,self._prefix)
         return rsc.name.startswith(self._prefix) and \
             getattr(rsc, 'appService', None) is None
 
@@ -415,7 +416,7 @@ class BigIPProxy(object):
             tunnel.records = []
             for record in tunnel.records_s.get_collection():
                 tunnel.records.append({'name': record.name, 'endpoint': record.endpoint})
-
+        LOGGER.info("lavanya tunnels monitored is: %s",tunnels)
         # Refresh the tunnel cache
         self._fdb_tunnels = {
             t.name: self._create_resource(IcrFDBTunnel, t,
@@ -423,6 +424,14 @@ class BigIPProxy(object):
             for t in tunnels if (self._manageable_resource(t) and
                                  t.partition == self._partition)
         }
+        for t in tunnels:
+            LOGGER.info("lavanya: tunnel is: %s",t.name)
+            LOGGER.info("managed partition is: %s,tunnel partition is: %s",self._partition,t.partition)
+            LOGGER.info("is it managable resource?: %s",self._manageable_resource(t))
+            if self._manageable_resource(t) and t.partition == self._partition:
+                LOGGER.info("lavanya: tunnel is :%s",t)
+
+        LOGGER.info("lavanya fdb tunnels is: %s",self._fdb_tunnels)
         self._all_fdb_tunnels = {
             t.name: self._create_resource(IcrFDBTunnel, t,
                                           default_route_domain)

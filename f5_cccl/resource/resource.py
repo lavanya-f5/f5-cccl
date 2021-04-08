@@ -293,6 +293,7 @@ class Resource(object):
             obj = self._uri_path(bigip).load(
                 name=urlquote(self.name),
                 partition=self.partition)
+            LOGGER.info("lavanya del obj is: %s",obj)
             obj.delete()
         except AttributeError as err:
             msg = "Could not delete {}, is it present on the BIG-IP?".format(

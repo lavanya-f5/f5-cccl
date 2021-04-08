@@ -73,7 +73,10 @@ class FDBTunnel(Resource):
     def __hash__(self):  # pylint: disable=useless-super-delegation
         return super(FDBTunnel, self).__hash__()
 
+
     def _uri_path(self, bigip):
+        LOGGER.info("lavanya : tunnel cmd is %s",bigip.tm.net.fdb.tunnels.tunnel)
+
         return bigip.tm.net.fdb.tunnels.tunnel
 
 

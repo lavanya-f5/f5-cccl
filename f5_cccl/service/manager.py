@@ -68,7 +68,8 @@ class ServiceConfigDeployer(object):
         existing_set = set(existing)
         unmanaged_set = set(unmanaged)
         managed_set = set(managed)
-
+        LOGGER.info("lavnya: DESIRED set is: %s",desired_set)
+        LOGGER.info("lavanya: managed set is: %s",managed_set)
         # Create any managed resource that doesn't currently exist
         create_list = [
             desired[resource] for resource in
@@ -481,20 +482,19 @@ class ServiceConfigDeployer(object):
         LOGGER.debug("Getting tunnel tasks...")
         existing = self._bigip.get_fdb_tunnels()
         desired = desired_config.get('fdbTunnels', dict())
+        LOGGER.info("lavanya existing config is :%s",existing)
+        LOGGER.info("lavanya desired config is %s:",desired)
         (create_tunnels, update_tunnels, delete_tunnels) = (
             self._get_resource_tasks(existing, desired)[0:3])
-
         # If there are pre-existing (user-created) tunnels that we are
         # managing, we want to only update these tunnels.
         LOGGER.debug("Getting pre-existing tunnel update tasks...")
         desired = desired_config.get('userFdbTunnels', dict())
         update_existing_tunnels = self._get_user_tunnel_tasks(desired)
-
         LOGGER.debug("Building task lists...")
         create_tasks = create_arps + create_tunnels
         update_tasks = update_arps + update_tunnels + update_existing_tunnels
         delete_tasks = delete_arps + delete_tunnels
-
         taskq_len = len(create_tasks) + len(update_tasks) + len(delete_tasks)
 
         return self._run_tasks(
@@ -701,7 +701,7 @@ class ServiceManager(object):
         # Read in the configuration
         desired_config = self._config_reader.read_net_config(
             service_config, default_route_domain)
-
+        LOGGER.info("lavanya desired config is: %s",desired_config)
         # Deploy the service desired configuration.
         retval = self._service_deployer.deploy_net(desired_config)
 
