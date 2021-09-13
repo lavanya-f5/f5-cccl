@@ -376,7 +376,7 @@ class ServiceConfigDeployer(object):
         #     self._pre_deploy_legacy_ltm_cleanup()
 
         self._bigip.refresh_ltm()
-
+        LOGGER.debug("laanya: desired config is: %s", desired_config)
         # Get the list of virtual address tasks
         LOGGER.debug("Getting virtual address tasks...")
         existing = self._bigip.get_virtual_addresses()
@@ -655,7 +655,7 @@ class ServiceManager(object):
 
         LOGGER.debug("apply_ltm_config start")
         start_time = time()
-
+        LOGGER.debug("lavanya: service config is %s", service_config)
         # Validate the service configuration.
         self._config_validator.validate(service_config)
 
