@@ -450,7 +450,7 @@ class ServiceConfigDeployer(object):
         delete_tasks = delete_iapps + delete_virtuals + delete_policies + \
             delete_irules + delete_internal_data_groups + delete_pools + \
             delete_monitors
-        LOGGER.debugf("lavanya: delete tasks is {}".format(delete_tasks))
+        LOGGER.debug("lavanya: delete tasks is: %s",delete_tasks)
         taskq_len = len(create_tasks) + len(update_tasks) + len(delete_tasks)
 
         taskq_len = self._run_tasks(
