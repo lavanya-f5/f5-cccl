@@ -87,6 +87,9 @@ class Resource(object):
         self._whitelist = False
         # previously applied updates by CCCL to the resource
         self._whitelist_updates = None
+        # For static routes resources are created in Common
+        if self.classname() == "ApiRoute":
+            self._data['partition'] = "Common"
 
         if properties:
             for key, default in list(self.common_properties.items()):

@@ -72,6 +72,7 @@ class BigIPProxy(object):
 
         self._bigip = bigip
         self._partition = partition
+        self._static_route_parition = "Common"
 
         self._prefix = ""
         if prefix:
@@ -388,6 +389,8 @@ class BigIPProxy(object):
         """Refresh the internal net cache with the BIG-IP state."""
         start_time = time()
         query = "$filter=partition+eq+{}".format(self._partition)
+        query_routes = "$filter=partition+eq+{}".format(self._static_route_parition)
+
 
         #  Determine the current route domain default for the partition
         default_route_domain = self.get_default_route_domain()
@@ -398,9 +401,9 @@ class BigIPProxy(object):
             requests_params={"params": query})
 
         #Retrieve list of routes
-        LOGGER.debug("Retrieving routes from BIG-IP /%s...", self._partition)
+        LOGGER.debug("Retrieving routes from BIG-IP /%s...", self._static_route_parition)
         routes = self._bigip.tm.net.routes.get_collection(
-            requests_params={"params": query})
+            requests_params={"params": query_routes})
         # Retrieve the list of tunnels
         # WORKAROUND: We don't pass the request_params in the fdb tunnel case,
         # due to an issue with the f5-sdk expecting an object param, rather
@@ -535,5 +538,5 @@ class BigIPProxy(object):
         return self._fdb_tunnels
 
     def get_routes(self):
-        """Return the index of arps."""
+        """Return the index of routes."""
         return self._routes
