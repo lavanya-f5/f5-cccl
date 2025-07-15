@@ -264,8 +264,12 @@ class Resource(object):
             # removing the mutate read-only attribute 'network' while updating the Route
             if self.classname() == "ApiRoute":
                 payload.pop("network")
-                obj.delete()
-                obj.create()
+                # Only delete and create if network-related attributes have changed
+                # For simple description changes, use regular update
+                if self._requires_route_recreation(obj, payload):
+                    obj.delete()
+                    obj.create(**self._data)
+                    return  # Skip regular update after recreation
 
             if modify:
                 obj.modify(**payload)
@@ -377,6 +381,47 @@ class Resource(object):
         This needs to be implemented by a Resouce subclass.
         """
         raise NotImplementedError
+
+    def _requires_route_recreation(self, existing_obj, payload):
+        """Determine if a route requires recreation (delete + create).
+        
+        Only recreate routes when network-related attributes have changed.
+        For simple description changes, use regular update.
+        
+        Args:
+            existing_obj: The existing route object from BIG-IP
+            payload: The update payload (without 'network' attribute)
+            
+        Returns:
+            bool: True if route needs recreation, False for regular update
+        """
+        if self.classname() != "ApiRoute":
+            return False
+            
+        # Network-related attributes that require recreation
+        # These are the gateway types that F5 BIG-IP recognizes
+        network_attrs = ['gw', 'blackhole', 'tmInterface', 'pool']
+        
+        # Check if any network-related attributes have changed
+        # Only check attributes that are actually present in the payload
+        for attr in network_attrs:
+            if attr in payload:  # Only check if attribute is being updated
+                existing_value = getattr(existing_obj, attr, None)
+                new_value = payload.get(attr, None)
+                
+                # If values are different, recreation is needed
+                if existing_value != new_value:
+                    return True
+                    
+        # Check if network attribute changed (from self._data vs existing)
+        existing_network = getattr(existing_obj, 'network', None)
+        new_network = self._data.get('network', None)
+        
+        if existing_network != new_network:
+            return True
+            
+        # No network-related changes, use regular update for description changes
+        return False
 
     def _handle_http_error(self, error):
         """Extract the error code and reraise a CCCL Error."""
