@@ -17,7 +17,12 @@
 """F5 Common Controller Core Library to read, diff and apply BIG-IP config."""
 
 import logging
-import pkg_resources
+
+# Modern resource loading compatible with setuptools 82+
+try:
+    from importlib.resources import files  # Python 3.9+
+except ImportError:
+    from importlib_resources import files  # Python 3.8 fallback
 
 from f5_cccl.bigip import BigIPProxy
 from f5_cccl.service.manager import ServiceManager
@@ -67,8 +72,8 @@ class F5CloudServiceManager(object):
                                        prefix=prefix)
 
         if schema_path is None:
-            schema_path = pkg_resources.resource_filename(resource_package,
-                                                          ltm_api_schema)
+            # Use modern importlib.resources (setuptools 82+ compatible)
+            schema_path = str(files(resource_package).joinpath(ltm_api_schema))
         self._service_manager = ServiceManager(self._bigip_proxy,
                                                partition,
                                                schema_path)
